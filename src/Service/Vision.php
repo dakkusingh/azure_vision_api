@@ -2,7 +2,7 @@
 
 namespace Drupal\azure_vision_api\Service;
 
-use Drupal\azure_cognitive_services_api\Service\Client;
+use Drupal\azure_cognitive_services_api\Service\Client as AzureClient;
 use Drupal\Core\Config\ConfigFactory;
 
 /**
@@ -11,16 +11,24 @@ use Drupal\Core\Config\ConfigFactory;
  */
 class Vision {
 
-  const API_URL = '/vision/v1.0/';
+  /**
+   * @var \Drupal\azure_cognitive_services_api\Service\Client
+   */
+  private $azureClient;
+
+  /**
+   * @var \Drupal\Core\Config\ConfigFactory
+   */
+  private $configFactory;
 
   /**
    * Constructor for the Vision API class.
    *
-   * @param \Drupal\Core\Config\ConfigFactory $config_factory
+   * @param \Drupal\Core\Config\ConfigFactory $configFactory
    */
-  public function __construct(ConfigFactory $config_factory) {
-    $this->client = new Client($config_factory, 'vision');
-    $this->config = $config_factory->get('azure_vision_api.settings');
+  public function __construct(ConfigFactory $configFactory, AzureClient $azureClient) {
+    $this->config = $configFactory->get('azure_vision_api.settings');
+    $this->azureClient = $azureClient;
   }
 
   /**
@@ -36,7 +44,7 @@ class Vision {
                           $visualFeatures = TRUE,
                           $details = TRUE
   ) {
-    $uri = self::API_URL . 'analyze';
+    $uri = $this->config->get('api_url') . 'analyze';
     $params = [];
 
     if ($details) {
@@ -53,7 +61,7 @@ class Vision {
       $uri = urldecode($uri . '?' . $queryString);
     }
 
-    $result = $this->client->doRequest($uri, 'POST', ['url' => $photoUrl]);
+    $result = $this->azureClient->doRequest('vision', $uri, 'POST', ['url' => $photoUrl]);
 
     return $result;
   }
