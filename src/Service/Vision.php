@@ -61,7 +61,8 @@ class Vision {
       $uri = urldecode($uri . '?' . $queryString);
     }
 
-    $result = $this->azureClient->doRequest('vision', $uri, 'POST', ['url' => $photoUrl]);
+    $body = ['json' => ['url' => $photoUrl]];
+    $result = $this->azureClient->doRequest('vision', $uri, 'POST', $body);
 
     return $result;
   }
